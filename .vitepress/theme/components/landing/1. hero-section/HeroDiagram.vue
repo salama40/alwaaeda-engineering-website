@@ -6,10 +6,11 @@ import SvgInputs from './svg-elements/SvgInputs.vue'
 import SvgOutputs from './svg-elements/SvgOutputs.vue'
 import SvgBlueIndicator from './svg-elements/SvgBlueIndicator.vue'
 import SvgPinkIndicator from './svg-elements/SvgPinkIndicator.vue'
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger'
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger' // تأكد من استيراد ScrollTrigger
 import { SvgNodeProps } from '../common/SvgNode.vue'
 
-gsap.registerPlugin(MotionPathPlugin)
+// **التصحيح هنا: سجل كلا الـ plugins**
+gsap.registerPlugin(MotionPathPlugin, ScrollTrigger)
 
 // Define the paths on the input side of the diagram
 const inputPaths = [
@@ -37,9 +38,9 @@ const inputLines: Ref<SvgNodeProps>[] = inputPaths.map((path) =>
 
 // Define the file set "combinations" that can be shown on the input side
 const inputFileSets = ref([
-  [{ label: 'جودة', color: '#ff8d67' }, { label: 'سرعة', color: '#40b782' }, { label: 'أمان', color: '#678dff' }],
-  [{ label: 'صيانة', color: '#ff678d' }, { label: 'تطوير', color: '#8dff67' }, { label: 'تركيب', color: '#67ff8d' }],
-  [{ label: 'تصميم', color: '#8d67ff' }, { label: 'دعم', color: '#ff8d67' }, { label: 'ضمان', color: '#40b782' }],
+  [{ label: 'الجودة', color: '#ff8d67' }, { label: 'السرعة', color: '#40b782' }, { label: 'الامان', color: '#678dff' }],
+  [{ label: 'الصيانة', color: '#ff678d' }, { label: 'التطوير', color: '#8dff67' }, { label: 'التركيب', color: '#67ff8d' }],
+  [{ label: 'التصميم', color: '#8d67ff' }, { label: 'الدعم', color: '#ff8d67' }, { label: 'الضمان', color: '#40b782' }],
 ])
 
 // Setup objects representing each output line's animation state

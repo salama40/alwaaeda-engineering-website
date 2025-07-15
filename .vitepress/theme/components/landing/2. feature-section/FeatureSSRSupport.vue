@@ -1,369 +1,362 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { Ref, ref, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger)
 
-const isSectionActive = ref(false);
+// ** هنا استيراد الصور بمساراتك المحددة **
+// تأكد جداً أن مجلد 'images' في نفس مستوى ملف الـ Vue Component هذا.
+import passengerLiftImage from './images/pho5.png'
+import cargoLiftImage from './images/pho6.jpg'
+import panoramicLiftImage from './images/pho7.png'
+import specialLiftImage from './images/pho8.png'
 
-let scrollTriggerInstance: ScrollTrigger | null = null;
 
-// useSlideIn('#ssr-support'); // تم التعليق عليه لو كان بيعمل تعارض مع أنيميشن البطاقات الجديد
+// بيانات لأنواع المصاعد
+interface ElevatorType {
+  name: string;
+  description: string;
+  imageUrl: string; // الآن تحمل المسار المستورد
+  link: string;
+}
 
-// قائمة بألوان التوهج المختلفة
-const glowColors = [
-    '#00BFFF', // Blue
-    '#32CD32', // Green
-    '#FFD700', // Gold
-    '#FF69B4', // Pink
-    '#8A2BE2', // Purple
-    '#FF4500', // Orange
+const elevatorTypes: ElevatorType[] = [
+  {
+    name: 'مصاعد خاصة ',
+    description: 'توفير تجربة نقل مريحة وآمنة للأفراد في جميع أنواع المباني.',
+    imageUrl: passengerLiftImage,
+    link: '/products/passenger-lifts',
+  },
+  {
+    name: 'المصاعد الذكية',
+    description: 'حلول قوية وفعالة لنقل الأحمال الثقيلة بكفاءة وأمان تام.',
+    imageUrl: cargoLiftImage,
+    link: '/products/cargo-lifts',
+  },
+  {
+    name: 'مصاعد دون حفر',
+    description: 'لمسة من الفخامة والعصرية مع إطلالات ساحرة للمباني المميزة.',
+    imageUrl: panoramicLiftImage,
+    link: '/products/panoramic-lifts',
+  },
+  {
+    name: 'مصاعد هيدروليك',
+    description: 'تصميم مخصص للمستشفيات، المنازل، والكراسي المتحركة بمرونة عالية.',
+    imageUrl: specialLiftImage,
+    link: '/products/special-lifts',
+  },
 ];
 
-// دالة لجلب لون التوهج بناءً على الـ ID (أو أي منطق آخر)
-const getGlowColor = (id: number) => {
-    return glowColors[(id - 1) % glowColors.length];
-};
 
-const animateCardsIn = () => {
-    if (!isSectionActive.value) {
-        isSectionActive.value = true;
-        // أنيميشن البطاقات: تبدأ من منطقة مركزية، مصغرة، بدوران عشوائي، ثم تنتشر لمكانها
-        gsap.fromTo('.service-card',
-            {
-                opacity: 0,
-                scale: 0.7, // تبدأ بحجم أصغر
-                rotation: (i) => gsap.utils.random(-15, 15), // دوران عشوائي لكل بطاقة
-                y: 80, // تبدأ من أسفل قليلاً
-                x: (i) => gsap.utils.random(-50, 50), // تبدأ من يمين/يسار عشوائي قليلاً
-            },
-            {
-                opacity: 1,
-                scale: 1, // تصل للحجم الطبيعي
-                rotation: 0, // تعود لدوران 0
-                y: 0, // تصل لمكانها الطبيعي في الـ Grid
-                x: 0, // تصل لمكانها الطبيعي في الـ Grid
-                duration: 1.2, // مدة أطول للأنيميشن
-                stagger: 0.1, // تأخير تتابعي بين البطاقات
-                ease: 'back.out(1.7)', // أنيميشن ارتدادي جذاب
-                delay: 0.5 // تأخير بسيط قبل بدء أنيميشن البطاقات
-            }
-        );
+// ** جزء الأنميشن GSAP/ScrollTrigger **
+const glowPosition: Ref<number> = ref(0)
+const glowVisible: Ref<boolean> = ref(false)
+const CHECKMARK_COUNT = 6;
+const checkmarks = Array.from({ length: CHECKMARK_COUNT }, (): Ref<boolean> => ref(false))
 
-        // أنيميشن التوهج الخلفي للبطاقات عند ظهورها (كما هو)
-        gsap.fromTo('.service-card::before',
-            { opacity: 0, scaleY: 0 },
-            { opacity: 0.9, scaleY: 1, duration: 1.2, stagger: 0.1, delay: 0.7, ease: 'power2.out' } // تأخير متناسق مع البطاقات
-        );
-
-        // **تم إزالة أنيميشن ظهور الحدود ::after هنا، حيث تم حذفها بالكامل**
-    }
-};
+let mainTimeline: gsap.core.Timeline | null = null;
 
 onMounted(() => {
-    const element = document.querySelector('#ssr-support');
-    if (!element) {
-        console.warn('Element #ssr-support not found for ScrollTrigger.');
-        return;
+  // الأنميشن الأصلي لـ ScrollTrigger (إن كنت لا تزال تستخدمه)
+  ScrollTrigger.create({
+    trigger: '#continuous-integration',
+    start: 'top bottom',
+    end: 'bottom top',
+    onEnter: () => {
+      if (!mainTimeline || !mainTimeline.isActive()) {
+        mainTimeline = startScrollAnimation();
+      }
+      // تفعيل أنيميشن الكروت عند الدخول
+      animateCardsOnScroll(); 
+    },
+    onLeaveBack: () => {
+      if (!mainTimeline || !mainTimeline.isActive()) {
+        mainTimeline = startScrollAnimation();
+      }
+      // إعادة ضبط حالة الكروت عند الخروج لأعلى
+      resetCardsAnimation();
+    },
+    onLeave: () => {
+      if (mainTimeline) {
+        mainTimeline.pause(0);
+        glowPosition.value = 0;
+        glowVisible.value = false;
+        checkmarks.forEach(c => c.value = false);
+      }
+      // إعادة ضبط حالة الكروت عند الخروج لأسفل
+      resetCardsAnimation();
+    },
+    onEnterBack: () => {
+      if (!mainTimeline || !mainTimeline.isActive()) {
+        mainTimeline = startScrollAnimation();
+      }
+      // تفعيل أنيميشن الكروت عند الرجوع من الأسفل
+      animateCardsOnScroll();
     }
+  });
 
-    scrollTriggerInstance = ScrollTrigger.create({
-        trigger: '#ssr-support',
-        start: 'top 70%',
-        once: true,
-        onEnter: () => {
-            animateCardsIn();
-        },
-        // markers: true,
-    });
+  // قم بضبط الحالة الأولية للكروت
+  gsap.set('.elevator-card', { scale: 0.8, opacity: 0 });
 });
 
 onUnmounted(() => {
-    if (scrollTriggerInstance) {
-        scrollTriggerInstance.kill();
-    }
+  if (mainTimeline) {
+    mainTimeline.kill();
+    mainTimeline = null;
+  }
+  ScrollTrigger.getAll().forEach(st => st.kill());
 });
 
-const serviceCards = ref([
-    { id: 1, title: 'تصميم احترافي', description: 'حلول تصميمية مبتكرة تتناسب مع كل المساحات' },
-    { id: 2, title: 'تركيب دقيق', description: 'فريق متخصص يضمن تركيب المصاعد بدقة وأمان' },
-    { id: 3, title: 'صيانة دورية', description: 'عقود صيانة شاملة لضمان أداء مثالي وتقليل الأعطال' },
-    { id: 4, title: 'تحديث وتطوير', description: 'تحديث الأنظمة القديمة بأحدث التقنيات '},
-    { id: 5, title: 'دعم فني 24/7', description: 'دعم فني متاح على مدار الساعة للتعامل مع أي طارئ'},
-    { id: 6, title: 'قطع غيار أصلية', description: 'نضمن توفير قطع غيار أصلية وعالية الجودة ' },
-]);
+const startScrollAnimation = () => {
+  glowPosition.value = 0
+  glowVisible.value = false
+  checkmarks.forEach((checkmark) => (checkmark.value = false))
 
+  const timeline = gsap.timeline({
+    repeat: -1,
+    defaults: {
+      duration: 0.1,
+      ease: 'power2.out',
+    },
+  });
+
+  timeline.to(
+    glowPosition,
+    {
+      value: 1,
+      duration: 1.0,
+      ease: 'power2.in',
+    },
+    0,
+  );
+
+  timeline.call(
+    () => {
+      glowVisible.value = true
+    },
+    undefined,
+    0.2,
+  );
+  timeline.call(
+    () => {
+      glowVisible.value = false
+    },
+    undefined,
+    0.8,
+  );
+
+  checkmarks.forEach((checkmark, index) => {
+    timeline.call(
+      () => {
+        checkmark.value = true
+      },
+      undefined,
+      0.3 + index * 0.1,
+    );
+    timeline.call(
+      () => {
+        checkmark.value = false;
+      },
+      undefined,
+      0.3 + index * 0.1 + 0.2,
+    );
+  });
+
+  return timeline;
+}
+
+// ** وظائف الأنميشن الجديدة للكروت **
+const animateCardsOnScroll = () => {
+  gsap.to('.elevator-card', {
+    scale: 1,
+    opacity: 1,
+    duration: 0.8,
+    ease: 'power3.out',
+    stagger: 0.15 // تأخير بسيط بين كل كارت
+  });
+};
+
+const resetCardsAnimation = () => {
+  gsap.to('.elevator-card', {
+    scale: 0.8,
+    opacity: 0,
+    duration: 0.5,
+    ease: 'power3.in',
+    stagger: 0.05,
+    overwrite: true // مهم لضمان إعادة الضبط بشكل صحيح
+  });
+};
 </script>
 
 <template>
-    <div
-        class="feature-card"
-        id="ssr-support"
-        :class="{ 'section-active': isSectionActive }"
-    >
-        <div class="service-cards-container">
-            <div
-                class="service-card"
-                v-for="card in serviceCards"
-                :key="card.id"
-                :style="{'--glow-color': getGlowColor(card.id)}"
-            >
-                <div class="card-content-wrapper">
-                    <h3>{{ card.title }}</h3>
-                    <p>{{ card.description }}</p>
-                    <!-- تم نقل card-status-bottom هنا ليكون في نهاية card-content-wrapper -->
-                    <div class="card-status-bottom">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Active</span>
-                    </div>
-                </div>
-            </div>
+  <div
+    class="feature-card"
+    id="continuous-integration"
+  >
+   
+    <div class="elevator-cards-container">
+      <a v-for="type in elevatorTypes" :key="type.name" :href="type.link" class="elevator-card">
+        <div class="card-image-background" :style="{ backgroundImage: 'url(' + type.imageUrl + ')' }">
         </div>
+        <div class="card-content-overlay-text">
+            <h3 class="card-title">{{ type.name }}</h3>
+        </div>
+      </a>
     </div>
+  </div>
 </template>
 
-<style scoped lang="css">
-/*
-  ملاحظة هامة: تم تحويل الـ CSS اللي فيه nesting لـ Vanilla CSS.
-*/
-
+<style scoped>
 .feature-card {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 30px 20px;
-    box-sizing: border-box;
-    min-height: 320px;
-    background-color: #1a1a1a;
-    border-radius: 16px;
-    border: 1px solid #333;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-@media (min-width: 768px) {
-    .feature-card {
-        transform: translate3d(-60px, 0, 0);
-    }
+.feature__meta {
+  max-width: 700px;
+  text-align: center;
+  margin: 0 auto 30px auto;
+  padding: 0 15px;
 }
 
-@media (max-width: 380px) {
-    .feature-card {
-        height: auto;
-        padding: 20px 10px;
-        min-height: auto;
-    }
+.meta__title {
+  font-size: 2em !important;
+  font-weight: bold !important;
+  margin-bottom: 8px;
 }
 
-.service-cards-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+.meta__description {
+  font-size: 1.1em !important;
+  font-weight: 500 !important;
+  color: var(--vp-c-text-2);
+  margin-top: 10px;
+}
+
+/* تنسيقات الكروت */
+.elevator-cards-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* عمودين ثابتين */
+  gap: 30px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.elevator-card {
+  background-color: var(--vp-c-bg-soft); /* لون خلفية الكارت نفسه */
+  border-radius: 10px;
+  padding: 0;
+  text-align: center;
+  box-shadow: var(--vp-shadow-2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 280px;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  position: relative;
+}
+
+.elevator-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: var(--vp-shadow-3);
+}
+
+/* حاوية الصورة كخلفية للكارت كله */
+.card-image-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1;
+}
+
+/* طبقة التراكب النصية */
+.card-content-overlay-text {
+  position: relative;
+  z-index: 2;
+  padding: 25px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  /* تم تعديل هذا السطر */
+  background-color: transparent; /* جعل الخلفية شفافة تمامًا */
+  /* أو يمكنك إزالة السطر بالكامل لو لم تحتج أي خلفية */
+  transition: background-color 0.3s ease;
+}
+
+/* تم تعديل هذا السطر لجعل الخلفية شفافة عند التحويم أيضًا */
+.elevator-card:hover .card-content-overlay-text {
+  background-color: transparent;
+}
+
+
+.card-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 0;
+  color: rgb(252, 252, 252); /* النص سيكون أبيض ليبرز على الخلفية الداكنة */
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* ظل خفيف للنص لزيادة الوضوح */
+}
+
+/* تم حذف تنسيقات .card-description بالكامل */
+
+/* تعديل الـ media queries لـ 2 كروت في الصف */
+@media (max-width: 960px) {
+  .elevator-cards-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    max-width: 700px;
+  }
+  .elevator-card {
+    min-height: 260px;
+  }
+  .card-content-overlay-text {
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 1.1em;
+  }
+}
+
+@media (max-width: 640px) {
+  .elevator-cards-container {
+    grid-template-columns: 1fr; /* عمود واحد على هذه الشاشات */
+    padding: 0 15px;
     gap: 20px;
-    width: 100%;
-    max-width: 1200px;
+  }
+  .elevator-card {
+    min-height: 240px;
+  }
+  .card-title {
+    font-size: 1em;
+  }
 }
 
-.service-card {
-    position: relative; /* مهم للـ absolute positioning بتاع التوهج والـ status-bottom */
-    background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
-    border-radius: 8px;
-    padding: 0;
-    text-align: center;
-    color: #e0e0e0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* تأكد أن الـ transition ده للبطاقة كلها */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 220px; /* طول البطاقة */
-    overflow: hidden;
-
-    /* ---------------------------------------------------- */
-    /* --- شكل البطاقة (Clip-Path) - تعديل ليكون أقرب للصورة --- */
-    /* ---------------------------------------------------- */
-    clip-path: polygon(
-        0% 15px,      /* زاوية علوية يسار */
-        15px 0%,      /* زاوية علوية يسار */
-        calc(100% - 25px) 0%, /* زاوية علوية يمين */
-        100% 25px,    /* زاوية علوية يمين */
-        100% 100%,    /* أسفل يمين (مستقيم) */
-        0% 100%       /* أسفل يسار (مستقيم) */
-    );
-    /* هذا الـ clip-path يحاكي شكل بطاقة صلاح بشكل أفضل، مع زوايا علوية مميزة وحواف سفلية مستقيمة. */
-}
-
-/* ---------------------------------------------------- */
-/* --- الحدود الخارجية (::after) - تم حذفها بالكامل --- */
-/* ---------------------------------------------------- */
-/* تم إزالة .service-card::after بالكامل */
-
-
-/* ---------------------------------------------------- */
-/* --- تأثير التوهج (Glow) تحت البطاقة - أوضح --- */
-/* ---------------------------------------------------- */
-.service-card::before {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 50%;
-    transform: translateX(-50%) scaleY(0);
-    transform-origin: bottom;
-    width: 95%;
-    height: 50px;
-    background: radial-gradient(circle, var(--glow-color, #FFD700ee) 0%, transparent 70%); /* لون افتراضي ذهبي للتوهج */
-    filter: blur(35px);
-    opacity: 0;
-    transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
-    z-index: -1;
-}
-
-/* ---------------------------------------------------- */
-/* --- تأثير الـ Hover للبطاقة - تكبير البطاقة كلها + التوهج --- */
-/* ---------------------------------------------------- */
-.service-card:hover {
-    transform: translateY(-10px) scale(1.05); /* حركة وتكبير أوضح عند الـ hover */
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
-    background: linear-gradient(145deg, #303030, #252525);
-}
-
-.service-card:hover::before {
-    opacity: 1; /* التوهج يظهر بالكامل */
-    filter: blur(50px);
-    transform: translateX(-50%) scaleY(1) translateY(-8px);
-}
-
-
-/* ---------------------------------------------------- */
-/* --- ستايلات محتوى البطاقة --- */
-/* ---------------------------------------------------- */
-.card-content-wrapper {
-    width: 100%;
-    padding: 15px;
-    padding-top: 25px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* لضمان دفع status للأسفل */
-    flex-grow: 1; /* مهم عشان يأخذ المساحة المتاحة ويدفع الـ status للأسفل */
-    position: relative; /* عشان الـ absolute positioning بتاع الـ status-bottom */
-}
-
-.service-card h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.3em;
-    font-weight: 600;
-    /* --- لون العناوين (H3) يرجع أصفر --- */
-    color: #ffe358; /* لون أصفر ثابت */
-    /* تم إزالة background-clip و text-fill-color */
-    letter-spacing: -0.5px;
-}
-
-.service-card p {
+@media (max-width: 480px) {
+  .feature__meta {
+    padding: 0 10px;
+  }
+  .elevator-card {
+    min-height: 220px;
+  }
+  .card-title {
     font-size: 0.9em;
-    line-height: 1.5;
-    color: #c0c0c0;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    flex-grow: 1; /* يدفع الـ status للأسفل */
-    margin-bottom: 15px; /* مسافة قبل الـ status */
+  }
 }
-
-/* ---------------------------------------------------- */
-/* --- تصميم "Active" في الأسفل خالص في المنتصف --- */
-/* ---------------------------------------------------- */
-.card-status-bottom {
-    position: absolute; /* مهم جداً لتثبيتها في الأسفل */
-    bottom: 15px; /* مسافة من أسفل البطاقة */
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #8bc34a; /* لون أخضر للحالة */
-    font-size: 0.9em;
-    font-weight: 600;
-    padding: 5px 10px;
-    background-color: rgba(60, 179, 113, 0.1);
-    border-radius: 5px;
-    border: 1px solid #4CAF50;
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
-    z-index: 2; /* لضمان ظهورها فوق التوهج */
-}
-
-.status-dot {
-    width: 10px;
-    height: 10px;
-    background-color: #4CAF50;
-    border-radius: 50%;
-    box-shadow: 0 0 6px #4CAF50;
-}
-
-
-/* Media Queries للتجاوبية (Responsive Design) */
-
-/* للأجهزة اللوحية (Tablet) - عمودين */
-@media (max-width: 1024px) {
-    .service-cards-container {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 18px;
-    }
-    .service-card {
-        min-height: 200px;
-    }
-    .service-card h3 {
-        font-size: 1.1em;
-    }
-    .service-card p {
-        font-size: 0.8em;
-    }
-}
-
-/* للهواتف الصغيرة (Mobile) - عمود واحد */
-@media (max-width: 600px) {
-    .service-cards-container {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    .feature-card {
-        padding: 25px 10px;
-    }
-    .service-card {
-        padding: 0;
-        min-height: auto;
-    }
-    .service-card h3 {
-        font-size: 1em;
-    }
-    .service-card p {
-        font-size: 0.75em;
-    }
-    .card-status-bottom {
-        position: relative; /* إرجاعها لـ relative عشان تظهر في التدفق العادي للموبايل */
-        bottom: auto;
-        left: auto;
-        transform: none;
-        margin-top: 15px;
-        width: fit-content;
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
-/* --- GSAP Animation related styles (Initial states) --- */
-.service-card {
-    opacity: 0;
-    transform: translateY(100px) scale(0.8);
-}
-
-.service-card::before {
-    opacity: 0;
-    transform: translateX(-50%) scaleY(0);
-}
-/* تم إزالة .service-card::after من الـ initial state لأنه تم حذفه بالكامل */
 </style>

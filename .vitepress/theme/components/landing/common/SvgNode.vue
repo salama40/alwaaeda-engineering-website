@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { computed, Ref, ref, watch, ComputedRef } from 'vue'
+import { computed, Ref, ref, watch, ComputedRef, onMounted } from 'vue' // استورد onMounted
 import { gsap } from 'gsap'
+import { MotionPathPlugin } from 'gsap/dist/MotionPathPlugin' // تأكد من استيراد MotionPathPlugin هنا أيضًا
+
+// بما أن MotionPathPlugin يستخدم getPointAtLength، تأكد من تسجيله
+// ليس شرطًا أن تسجله هنا إذا كنت تسجله مرة واحدة في HeroDiagram.vue
+// ولكن للتأكيد وضمان عمل SvgNode.vue بشكل مستقل، يفضل تسجيله.
+// إذا كنت متأكدًا أن HeroDiagram.vue هو الوحيد الذي يسجل، يمكنك إزالة هذا السطر.
+gsap.registerPlugin(MotionPathPlugin) // أضفت هذا السطر
 
 /**
  * A single glowing "node" (dot) on an SVG path.
@@ -53,7 +60,7 @@ const props = withDefaults(defineProps<SvgNodeProps>(), {
 /**
  * A unique id for the path, to avoid collisions in a single SVG output.
  */
-const pathId: Ref<string> = ref(Math.random().toString(36))
+const pathId: Ref<string> = ref(Math.random().toString(36).substring(2)) // substring لجعل الـ ID أقصر وأكثر قابلية للقراءة
 
 /**
  * A ref for the path element in the SVG DOM.
@@ -74,27 +81,26 @@ const gradientWidthScaleFactor: Ref<number> = ref(props.visible ? 1 : 0)
  * The length of the SVG path.
  */
 const pathLength: ComputedRef<number> = computed(() => {
-  if (!pathElement.value) return 0
-  return pathElement.value.getTotalLength()
+  // تأكد من وجود pathElement.value قبل محاولة getTotalLength()
+  return pathElement.value ? pathElement.value.getTotalLength() : 0
 })
 
 /**
- * The position of the dot on the SVG path.
+ * The position of the dot on the SVG path (x, y coordinates).
+ * **هنا هو التغيير الرئيسي:** استخدم ComputedRef لضمان إعادة الحساب تلقائيًا.
  */
-const dotPosition: Ref<{ x: number; y: number }> = ref({ x: 0, y: 0 })
+const dotCoordinates: ComputedRef<{ x: number; y: number }> = computed(() => {
+  if (!pathElement.value) {
+    // إذا لم يكن المسار موجودًا بعد، ارجع قيمة افتراضية لتجنب الأخطاء
+    return { x: 0, y: 0 }
+  }
+  // MotionPathPlugin.getPoint() يمكن أن يكون مفيدًا هنا إذا كنت تستخدمه بانتظام
+  // ولكن getTotalLength() و getPointAtLength() هي وظائف SVG الأصلية.
+  const pos = (1 - props.position) * pathLength.value
+  const point = pathElement.value.getPointAtLength(pos)
+  return { x: point.x, y: point.y }
+})
 
-/**
- * Watch for changes to the position of the dot.
- */
-watch(
-  () => props.position,
-  () => {
-    if (!pathElement.value) return { x: 0, y: 0 }
-    const position = (1 - props.position) * pathLength.value
-    const { x, y } = pathElement.value.getPointAtLength(position)
-    dotPosition.value = { x, y }
-  },
-)
 
 /**
  * The radius of the dot.
@@ -119,6 +125,15 @@ watch(
     })
   },
 )
+
+// هام: قم بتهيئة dotCoordinates بعد التأكد من أن pathElement.value متاح
+// onMounted لضمان أن الـ ref قد تم تعيينه
+onMounted(() => {
+  // هنا، dotCoordinates ستعيد حساب نفسها تلقائيًا
+  // عندما يتم تحميل pathElement.value لأول مرة.
+  // لا حاجة لتعيينها يدوياً هنا، computed property سيتكفل بذلك.
+});
+
 </script>
 
 <template>
@@ -132,20 +147,14 @@ watch(
       class="svg-path"
     />
     <circle
-      v-if="props.dotColor"
-      :cx="dotPosition.x"
-      :cy="dotPosition.y"
-      :r="dotRadius"
+      v-if="props.dotColor && pathElement" :cx="dotCoordinates.x" :cy="dotCoordinates.y" :r="dotRadius"
       :fill="props.dotColor ? props.dotColor : 'transparent'"
       class="circle-dot"
       :style="`--dot-color: ${props.dotColor}`"
       key="circle-dot"
     />
     <text
-      v-if="props.label"
-      :x="dotPosition.x"
-      :y="dotPosition.y + 15"
-      fill="#a3a3a3"
+      v-if="props.label && pathElement" :x="dotCoordinates.x" :y="dotCoordinates.y + 15" fill="#a3a3a3"
       font-family="Inter, sans-serif"
       font-size="11px"
       font-style="normal"
@@ -157,20 +166,19 @@ watch(
     >
       {{ props.label }}
     </text>
-    <defs>
-      <mask :id="`glow_mask_${pathId}`">
+    <defs v-if="pathElement"> <mask :id="`glow_mask_${pathId}`">
         <path :d="props.path" fill="black" />
         <circle
-          :cx="dotPosition.x"
-          :cy="dotPosition.y"
+          :cx="dotCoordinates.x"
+          :cy="dotCoordinates.y"
           :r="gradientWidth * gradientWidthScaleFactor"
           fill="white"
         />
       </mask>
       <radialGradient
         :id="`glow_gradient_${pathId}`"
-        :cx="dotPosition.x"
-        :cy="dotPosition.y"
+        :cx="dotCoordinates.x"
+        :cy="dotCoordinates.y"
         :r="gradientWidth * gradientWidthScaleFactor"
         gradientUnits="userSpaceOnUse"
       >
@@ -198,7 +206,8 @@ watch(
   /* يمكننا ضبط حجم الخط هنا ليكون أصغر على الشاشات الأصغر */
   font-size: 11px; /* حجم الخط الأساسي */
 
-  @media (max-width: 1179px) { /* طبق هذه الستايلات على الشاشات الأصغر من 1180px */
+  @media (max-width: 1179px) {
+    /* طبق هذه الستايلات على الشاشات الأصغر من 1180px */
     font-size: 9px; /* تصغير حجم الخط للموبايل والأجهزة اللوحية الصغيرة */
     /* يمكنك تعديل الـ y position في التيمبليت أو هنا إذا لزم الأمر */
     /* text-shadow لإضافة وضوح */

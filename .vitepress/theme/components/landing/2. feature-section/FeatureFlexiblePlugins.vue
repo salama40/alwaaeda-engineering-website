@@ -460,7 +460,6 @@ onUnmounted(() => {
             </radialGradient>
             
             
-            
 </defs>
         </svg>
 
@@ -470,9 +469,12 @@ onUnmounted(() => {
       </div>
     </div>
     <div class="feature__meta">
-      <div class="meta__title">      </div>
+      <div class="meta__title"></div>
       <div class="meta__description">
         </div>
+    </div>
+    <div class="sub-footer-text">
+      جميع أنواع المصاعد التي نقوم بتركيبها
     </div>
   </div>
 </template>
@@ -522,8 +524,8 @@ onUnmounted(() => {
 
 /* **إلغاء أو تعديل الميديا كويريز الخاصة بالـ .diagram scaling/positioning** */
 /* بما أننا قمنا بتوسيعه وتوسيعه في المنتصف باستخدام الـ flexbox و الـ absolute positioning،
-   لن نحتاج إلى هذه الميديا كويريز لتغيير الـ transform الأساسي.
-   سنستخدمها فقط لتعديل الـ scale إذا لزم الأمر لأحجام شاشات معينة. */
+    لن نحتاج إلى هذه الميديا كويريز لتغيير الـ transform الأساسي.
+    سنستخدمها فقط لتعديل الـ scale إذا لزم الأمر لأحجام شاشات معينة. */
 
 @media (min-width: 480px) {
   .feature__visualization .diagram {
@@ -562,7 +564,7 @@ onUnmounted(() => {
 
 /* **تم تعديل هذا الجزء ليكون أكثر مرونة** */
 /* بما أن الأنيميشن سيتحكم في الـ transform، يمكننا إزالة الـ translate3d الثابت هنا
-   أو جعله هو الـ initial state للـ animation */
+    أو جعله هو الـ initial state للـ animation */
 /* .feature__visualization .blue-chip__cube,
 .feature__visualization .pink-chip__cube {
   transform: translate3d(0, -60px, 0); 
@@ -659,5 +661,34 @@ onUnmounted(() => {
 }
 .feature__visualization.active:hover .pink-glow {
   opacity: 1;
+}
+
+/* **تنسيقات السطر الفرعي الجديد** */
+.sub-footer-text {
+  margin-top: 40px; /* مسافة من السكشن أعلاه */
+  font-size: 1em; /* حجم خط مناسب */
+  font-weight: bold;
+  color: var(--vp-c-text-1); /* لون النص الأساسي للثيم */
+  text-align: center; /* توسيط النص */
+  padding: 0 15px; /* بادينج لمنع النص من الالتصاق بالحواف على الشاشات الصغيرة */
+  max-width: 800px; /* تحديد أقصى عرض للنص لكي لا يمتد بشكل مبالغ فيه */
+  margin-left: auto; /* لتوسيط العنصر نفسه */
+  margin-right: auto; /* لتوسيط العنصر نفسه */
+  line-height: 1.4; /* مسافة بين السطور لتحسين القراءة */
+}
+
+/* تعديلات للخط على الشاشات الأصغر */
+@media (max-width: 768px) {
+  .sub-footer-text {
+    font-size: 1.3em;
+    margin-top: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sub-footer-text {
+    font-size: 1.1em;
+    margin-top: 20px;
+  }
 }
 </style>
