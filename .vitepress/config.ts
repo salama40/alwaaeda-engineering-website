@@ -93,7 +93,7 @@ export default defineConfig({
     ['meta', { name: 'twitter:title', content: ogTitle }],
     ['meta', { name: 'twitter:description', content: ogDescription }],
     ['meta', { name: 'twitter:image', content: ogImage }],
-
+    ['meta', {name:'google-site-verification' , content:"czK9OoopCagNd1lRPK7lhUHX8lR7OVHibbNZg08CYZE" }],
     ['meta', { name: 'theme-color', content: '#3498db' }],
   ],
 
