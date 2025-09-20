@@ -102,10 +102,7 @@ export default defineConfig({
     // اسم الشركة الذي يظهر بجوار الشعار في شريط التنقل (تم التعديل ليكون بالإنجليزية)
     siteTitle: companyNameEnglish,
 
-    editLink: {
-      pattern: 'https://github.com/your-github-username/your-repo-name/edit/main/docs/:path',
-      text: 'اقترح تعديلات على هذه الصفحة',
-    },
+   
 
     socialLinks: [
       { icon: 'facebook', link: 'https://www.facebook.com/profile.php?id=61558622763500' },
@@ -126,7 +123,7 @@ export default defineConfig({
             Email : www.elprof929@gmail.com
           </p>
           <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
-            Copyright © 2025- . جميع الحقوق محفوظة ${companyNameArabic}
+            Copyright © 2024- . جميع الحقوق محفوظة ${companyNameArabic}
           </p>
 
         </div>
