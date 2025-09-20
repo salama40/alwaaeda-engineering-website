@@ -21,231 +21,201 @@ const ogTitle = 'الهندسية الواعدة للمصاعد - تركيب، �
 const ogUrl = 'https://alwaaeda-elevators.netlify.app'
 
 const deployURL = process.env.DEPLOY_PRIME_URL || ''
-const commitRef = process.env.COMMIT_REF?.slice(0, 8) || ''
 
 const deployType = (() => {
-  switch (deployURL) {
-    case 'https://main--vite-docs-main.netlify.app':
-      return 'main'
-    case '':
-      return 'local'
-    default:
-      return 'release'
-  }
+  switch (deployURL) {
+    case 'https://main--vite-docs-main.netlify.app':
+      return 'main'
+    case '':
+      return 'local'
+    default:
+      return 'release'
+  }
 })()
 const additionalTitle = ((): string => {
-  switch (deployType) {
-    case 'main':
-      return ' (main branch)'
-    case 'local':
-      return ' (local)'
-    case 'release':
-      return ''
-  }
+  switch (deployType) {
+    case 'main':
+      return ' (main branch)'
+    case 'local':
+      return ' (local)'
+    case 'release':
+      return ''
+  }
 })()
 
 export default defineConfig({
-  lang: 'ar-EG',
-  title: `${ogTitle}${additionalTitle}`,
-  description: ogDescription,
+  lang: 'ar-EG',
+  title: `${ogTitle}${additionalTitle}`,
+  description: ogDescription,
 
-  head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
-    ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
-    [
-      'link',
-      {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
-        crossorigin: 'true',
-      },
-    ],
-    [
-      'link',
-      {
-        rel: 'preload',
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600&family=IBM+Plex+Mono:wght@400&display=swap',
-        as: 'style',
-      },
-    ],
-    [
-      'link',
-      {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600&family=IBM+Plex+Mono:wght@400&display=swap',
-      },
-    ],
-    // Smooth scroll for anchor links - VitePress handles this natively with themeConfig.scrollBehavior
-    // لذلك، تم إزالة هذا السطر لمنع التكرار أو التضارب
-    // ['style', {}, `html { scroll-behavior: smooth; }`],
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
+    [
+      'link',
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossorigin: 'true',
+      },
+    ],
+    [
+      'link',
+      {
+        rel: 'preload',
+        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600&family=IBM+Plex+Mono:wght@400&display=swap',
+        as: 'style',
+      },
+    ],
+    [
+      'link',
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600&family=IBM+Plex+Mono:wght@400&display=swap',
+      },
+    ],
+    ['meta', { name: 'keywords', content: 'الهندسية الواعدة للمصاعد, تركيب مصاعد, صيانة مصاعد, تحديث مصاعد, أسانسيرات, شركات مصاعد في مصر, حلول مصاعد, مصاعد كهربائية, مصاعد هيدروليكية, مصاعد بضائع, مصاعد ركاب, مصاعد بانورامية, أمان المصاعد, مقاولات مصاعد, توريد مصاعد, قطع غيار مصاعد, شركات اسانسيرات' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:title', content: ogTitle }],
+    ['meta', { property: 'og:image', content: ogImage }],
+    ['meta', { property: 'og:url', content: ogUrl }],
+    ['meta', { property: 'og:description', content: ogDescription }],
+    ['meta', { property: 'og:site_name', content: companyNameArabic }], 
+    ['meta', { property: 'og:locale', content: 'ar_EG' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:title', content: ogTitle }],
+    ['meta', { name: 'twitter:description', content: ogDescription }],
+    ['meta', { name: 'twitter:image', content: ogImage }],
+    ['meta', {name:'google-site-verification' , content:"czK9OoopCagNd1lRPK7lhUHX8lR7OVHibbNZg08CYZE" }],
+    ['meta', { name: 'theme-color', content: '#3498db' }],
+  ],
 
-    ['meta', { name: 'keywords', content: 'الهندسية الواعدة للمصاعد, تركيب مصاعد, صيانة مصاعد, تحديث مصاعد, أسانسيرات, شركات مصاعد في مصر, حلول مصاعد, مصاعد كهربائية, مصاعد هيدروليكية, مصاعد بضائع, مصاعد ركاب, مصاعد بانورامية, أمان المصاعد, مقاولات مصاعد, توريد مصاعد, قطع غيار مصاعد, شركات اسانسيرات' }],
+  themeConfig: {
+    logo: '/logo.svg',
+    siteTitle: companyNameEnglish,
+    socialLinks: [
+      { icon: 'facebook', link: 'https://www.facebook.com/profile.php?id=61558622763500' },
+      { icon: 'linkedin', link: 'https://www.linkedin.com/in/salama-hamdy-61301720a/' }
+    ],
 
-    ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: ogTitle }],
-    ['meta', { property: 'og:image', content: ogImage }],
-    ['meta', { property: 'og:url', content: ogUrl }],
-    ['meta', { property: 'og:description', content: ogDescription }],
-    ['meta', { property: 'og:site_name', content: companyNameArabic }], // استخدم الاسم العربي هنا للـ OG
-    ['meta', { property: 'og:locale', content: 'ar_EG' }],
+    footer: {
+      message: '',
+      copyright: `
+        <div style="text-align: center; padding: 20px 0;">
+          <p style="font-size:1.1em; color: #aaa;">
+            Designed And Developed By Elprof Salama ❤️
+          </p>
+          <p style="margin-top: 15px; font-size: 0.85em;">
+            تواصل معنا <br>
+            Phone : +201111343696<br>
+            Email : www.elprof929@gmail.com
+          </p>
+          <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
+            Copyright © 2024- . جميع الحقوق محفوظة الهندسية الواعدة للمصاعد
+          </p>
+        </div>
+      `
+    },
 
-    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-    ['meta', { name: 'twitter:title', content: ogTitle }],
-    ['meta', { name: 'twitter:description', content: ogDescription }],
-    ['meta', { name: 'twitter:image', content: ogImage }],
-    ['meta', {name:'google-site-verification' , content:"czK9OoopCagNd1lRPK7lhUHX8lR7OVHibbNZg08CYZE" }],
-    ['meta', { name: 'theme-color', content: '#3498db' }],
-  ],
-
-  themeConfig: {
-    logo: '/logo.svg',
-    // اسم الشركة الذي يظهر بجوار الشعار في شريط التنقل (تم التعديل ليكون بالإنجليزية)
-    siteTitle: companyNameEnglish,
-
-   
-
-    socialLinks: [
-      { icon: 'facebook', link: 'https://www.facebook.com/profile.php?id=61558622763500' },
-      { icon: 'linkedin', link: 'https://www.linkedin.com/in/salama-hamdy-61301720a/' }
-    ],
-
-    footer: {
-      // تم تعديل style لـ text-align: center; ليكون على العنصر الأب مباشرة
-      message: `
-        <div style="text-align: center; padding: 20px 0;">
-          <p style="font-size:1.1em; color: #aaa;">
-            Designed And Developed By Elprof Salama ❤️ ${commitRef}
-          </p>
-
-          <p style="margin-top: 15px; font-size: 0.85em;">
-            تواصل معنا <br>
-            Phone : +201111343696<br>
-            Email : www.elprof929@gmail.com
-          </p>
-          <p style="margin-top: 20px; font-size: 0.9em; color: #888;">
-            Copyright © 2024- . جميع الحقوق محفوظة ${companyNameArabic}
-          </p>
-
-        </div>
-      `,
-      copyright: ''
-    },
-
-    // --- هنا هو التعديل الأساسي لترتيب عناصر الـ nav ---
-    nav: [
-      // عناصر بدون قائمة منسدلة (ستظهر على اليسار بجانب الشعار)
-      { text: 'Home', link: '/' },
-      { text: 'Company', link: '/#company-section' },
-      { text: 'Services', link: '/#features-section' },
-      { text: 'Projects', link: '/#frameworks-section' },
-        // تم تغيير 'servises' إلى 'Services' للتصحيح الإملائي
-      { text: 'Contact Us', link: '/#final-cta-section' },
-      
-      // عناصر مع قائمة منسدلة (ستظهر على اليمين)
-      // VitePress يرتبها تلقائياً بناءً على ترتيبها هنا
-      {
-        text: 'Blogs', // تم إبقاء اسم القائمة 'Info'
-        items: [
-          { text: 'FAQs', link: '/news/faq' },
-          { text: 'Articles', link: '/news/our-first-article' }, // تم تصحيح 'articale' إلى 'articles'
-          { text: 'Services Overview', link: '/news/services-overview' },
-          { text: 'Elevator Installation', link: '/news/installation' },
-          { text: 'Elevator Maintenance', link: '/news/maintenance' },
-          { text: 'Elevator Modernization', link: '/news/modernization' },
-        ]
-      },
-      {
-        text: 'About Us', // تم تغيير 'company' إلى 'Company'
-        items: [
-          { text: 'team', link: '/news/team.md' },
-          { text: 'Who We Are', link: '/#testimonials-section' },
-        ]
-      },
-    ],
-
-    sidebar: {
-      '/news/': [
-        {
-          text: 'خدماتنا ومعلومات', // تم تعديل النص ليعكس محتوى القائمة المنسدلة "Info"
-          items: [
-            { text: 'المقالات', link: '/news/our-first-article' }, // تم تصحيح 'المقال' إلى 'المقالات'
-            { text: 'الأسئلة الشائعة', link: '/news/faq' },
-            { text: 'نظرة عامة على الخدمات', link: '/news/services-overview' },
-            { text: 'تركيب المصاعد', link: '/news/installation' },
-            { text: 'صيانة المصاعد', link: '/news/maintenance' },
-            { text: 'تحديث المصاعد', link: '/news/modernization' },
-            
-          ],
-        },
-      ],
-    
-      '/': [ // الـ sidebar الافتراضي للصفحات الرئيسية
-        {
-          text: 'روابط سريعة',
-          items: [
-            { text: 'الرئيسية', link: '/' },
-            { text: 'عن الشركة', link: '/#company-section' },
-            { text: 'خدماتنا', link: '/news/services-overview' }, // تم تعديل الرابط ليوجه لـ "services-overview" في مجلد news
-            { text: 'منتجاتنا', link: '/products/' }, // رابط لصفحة المنتجات الرئيسية
-            { text: 'مشاريعنا', link: '/#frameworks-section' }, // يظل يوجه لـ section في الصفحة الرئيسية
-            { text: 'تواصل معنا', link: '/#final-cta-section' }, // يظل يوجه لـ section في الصفحة الرئيسية
-          ],
-        },
-      ],
-    },
-
-    outline: {
-      level: [2, 3],
-    },
-
-    // --- هنا نضيف الـ scrollBehavior داخل themeConfig ونحدد أنواعها بشكل صحيح ---
-    scrollBehavior: (to: RouteLocationNormalizedLoaded, from: RouteLocationNormalizedLoaded, savedPosition: { left: number; top: number } | null) => {
-      if (savedPosition) {
-        return savedPosition;
-      }
-      if (to.hash) {
-        return {
-          el: to.hash,
-          behavior: 'smooth',
-          top: 60 // ممكن تعدل القيمة دي عشان تعوض ارتفاع الـ navbar لو موجود
-        };
-      }
-      return { top: 0, behavior: 'smooth' };
-    },
-  } as DefaultTheme.Config,
-  // End of themeConfig
-
-  transformPageData(pageData: PageData) {
-    const canonicalUrl = `${ogUrl}/${pageData.relativePath}`
-      .replace(/\/index\.md$/, '/')
-      .replace(/\.md$/, '')
-    pageData.frontmatter.head ??= []
-    pageData.frontmatter.head.unshift(
-      ['link', { rel: 'canonical', href: canonicalUrl }],
-      ['meta', { property: 'og:title', content: pageData.title }],
-      ['meta', { name: 'description', content: pageData.frontmatter.description || ogDescription }],
-    )
-    return pageData
-  },
-  markdown: {
-    codeTransformers: [transformerTwoslash()],
-    config(md: MarkdownIt) {
-      md.use(groupIconMdPlugin)
-    },
-  },
-  vite: {
-    plugins: [
-      // groupIconVitePlugin({ ... }),
-      // llmstxt({ ... }),
-    ],
-    optimizeDeps: {
-      include: [
-        '@shikijs/vitepress-twoslash/client',
-        'gsap',
-        'gsap/dist/ScrollTrigger',
-        'gsap/dist/MotionPathPlugin',
-      ],
-    },
-  },
-  buildEnd,
+    nav: [
+      { text: 'Home', link: '/' },
+      { text: 'Company', link: '/#company-section' },
+      { text: 'Services', link: '/#features-section' },
+      { text: 'Projects', link: '/#frameworks-section' },
+      { text: 'Contact Us', link: '/#final-cta-section' },
+      {
+        text: 'Blogs',
+        items: [
+          { text: 'FAQs', link: '/news/faq' },
+          { text: 'Articles', link: '/news/our-first-article' },
+          { text: 'Services Overview', link: '/news/services-overview' },
+          { text: 'Elevator Installation', link: '/news/installation' },
+          { text: 'Elevator Maintenance', link: '/news/maintenance' },
+          { text: 'Elevator Modernization', link: '/news/modernization' },
+        ]
+      },
+      {
+        text: 'About Us',
+        items: [
+          { text: 'team', link: '/news/team.md' },
+          { text: 'Who We Are', link: '/#testimonials-section' },
+        ]
+      },
+    ],
+    sidebar: {
+      '/news/': [
+        {
+          text: 'خدماتنا ومعلومات',
+          items: [
+            { text: 'المقالات', link: '/news/our-first-article' },
+            { text: 'الأسئلة الشائعة', link: '/news/faq' },
+            { text: 'نظرة عامة على الخدمات', link: '/news/services-overview' },
+            { text: 'تركيب المصاعد', link: '/news/installation' },
+            { text: 'صيانة المصاعد', link: '/news/maintenance' },
+            { text: 'تحديث المصاعد', link: '/news/modernization' },
+          ],
+        },
+      ],
+    
+      '/': [
+        {
+          text: 'روابط سريعة',
+          items: [
+            { text: 'الرئيسية', link: '/' },
+            { text: 'عن الشركة', link: '/#company-section' },
+            { text: 'خدماتنا', link: '/news/services-overview' },
+            { text: 'منتجاتنا', link: '/products/' },
+            { text: 'مشاريعنا', link: '/#frameworks-section' },
+            { text: 'تواصل معنا', link: '/#final-cta-section' },
+          ],
+        },
+      ],
+    },
+    outline: {
+      level: [2, 3],
+    },
+    scrollBehavior: (to: RouteLocationNormalizedLoaded, from: RouteLocationNormalizedLoaded, savedPosition: { left: number; top: number } | null) => {
+      if (savedPosition) {
+        return savedPosition;
+      }
+      if (to.hash) {
+        return {
+          el: to.hash,
+          behavior: 'smooth',
+          top: 60
+        };
+      }
+      return { top: 0, behavior: 'smooth' };
+    },
+  } as DefaultTheme.Config,
+  transformPageData(pageData: PageData) {
+    const canonicalUrl = `${ogUrl}/${pageData.relativePath}`
+      .replace(/\/index\.md$/, '/')
+      .replace(/\.md$/, '')
+    pageData.frontmatter.head ??= []
+    pageData.frontmatter.head.unshift(
+      ['link', { rel: 'canonical', href: canonicalUrl }],
+      ['meta', { property: 'og:title', content: pageData.title }],
+      ['meta', { name: 'description', content: pageData.frontmatter.description || ogDescription }],
+    )
+    return pageData
+  },
+  markdown: {
+    codeTransformers: [transformerTwoslash()],
+    config(md: MarkdownIt) {
+      md.use(groupIconMdPlugin)
+    },
+  },
+  vite: {
+    plugins: [],
+    optimizeDeps: {
+      include: [
+        '@shikijs/vitepress-twoslash/client',
+        'gsap',
+        'gsap/dist/ScrollTrigger',
+        'gsap/dist/MotionPathPlugin',
+      ],
+    },
+  },
+  buildEnd,
 })
