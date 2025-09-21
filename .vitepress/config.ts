@@ -10,9 +10,7 @@ import type { DefaultTheme } from 'vitepress/theme';
 import type { RouteLocationNormalizedLoaded } from 'vue-router';
 
 // --- Meta tags for SEO and social sharing ---
-// اسم الشركة بالعربي للاستخدام في الـ meta tags والـ footer
 const companyNameArabic = 'الهندسية الواعدة للمصاعد'
-// اسم الشركة بالإنجليزية كما هو مطلوب في الهيدر
 const companyNameEnglish = 'Alwaaeda Elevators'
 
 const ogDescription = 'الهندسية الواعدة للمصاعد: شركة رائدة في تركيب وصيانة وتحديث جميع أنواع المصاعد والاسانسيرات (ركاب، بضائع، بانورامية). نقدم حلول متكاملة وأنظمة أمان وجودة عالمية في مصر. خبراء في مصاعد كهربائية وهيدروليكية.'
@@ -32,6 +30,7 @@ const deployType = (() => {
       return 'release'
   }
 })()
+
 const additionalTitle = ((): string => {
   switch (deployType) {
     case 'main':
@@ -56,7 +55,7 @@ export default defineConfig({
       {
         rel: 'preconnect',
         href: 'https://fonts.gstatic.com',
-        crossorigin: 'true',
+        crossorigin: 'anonymous', 
       },
     ],
     [
@@ -88,6 +87,7 @@ export default defineConfig({
     ['meta', { name: 'twitter:image', content: ogImage }],
     ['meta', {name:'google-site-verification' , content:"czK9OoopCagNd1lRPK7lhUHX8lR7OVHibbNZg08CYZE" }],
     ['meta', { name: 'theme-color', content: '#3498db' }],
+    ['script', { async: '', src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3417531868368775', crossorigin: 'anonymous' }],
   ],
 
   themeConfig: {
